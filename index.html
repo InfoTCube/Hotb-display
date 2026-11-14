@@ -80,6 +80,14 @@
   #count.six7 span { width: 1.1ch; color: #FFD600; text-shadow: 0 0 3vw rgba(255,214,0,.7); animation: bob .45s ease-in-out infinite alternate; }
   #count.six7 span + span { animation-delay: -.45s; }
   @keyframes bob { from { transform: translateY(-5vh) rotate(-6deg); } to { transform: translateY(5vh) rotate(6deg); } }
+  /* Last 60 s: everything else steps aside, the seconds take the screen; last 10 s beat */
+  body.final main > :not(#count) { display: none; }
+  body.final #count { font-size: min(36vw, 72vh); }
+  body.final #count span { width: auto; }
+  body.last10 #count { font-size: min(60vw, 92vh); color: var(--pink); text-shadow: 0 0 4vw rgba(255,61,154,.8), 0 0 10vw rgba(255,61,154,.5); }
+  body.last10 #count span { animation: beat 1s ease-out; }
+  @keyframes beat { from { transform: scale(1.4); filter: brightness(1.8); } to { transform: scale(1); } }
+  #confetti { position: fixed; inset: 0; z-index: 25; pointer-events: none; width: 100%; height: 100%; }
   @keyframes strobe { from{opacity:.45} to{opacity:0} }
 
   @keyframes spikeIn { 0%{opacity:0} 6%,85%{opacity:1} 100%{opacity:0} }
@@ -122,6 +130,7 @@
   <div class="big" id="spikeBig"></div>
   <div class="sub" id="spikeSub"></div>
 </div>
+<canvas id="confetti"></canvas>
 
 <script>
   const END = new Date("2026-11-15T11:00:00+01:00").getTime();   // CET (Poland, November)
@@ -157,16 +166,45 @@
   };
   let force67 = false;
 
+  // Confetti: waves of falling paper for ~20 s
+  const cf = $("confetti"), cfx = cf.getContext("2d");
+  const CONF_COLORS = ["#0CEBE7", "#8B5CF6", "#FF3D9A", "#FFD600", "#ffffff"];
+  let bits = [];
+  function confetti(waves = 14) {
+    const dpr = devicePixelRatio;
+    const wave = () => { for (let i = 0; i < 120; i++) bits.push({
+      x: Math.random() * cf.width, y: -Math.random() * cf.height * .3,
+      vx: (Math.random() - .5) * 3 * dpr, vy: (2 + Math.random() * 3) * dpr,
+      r: Math.random() * 6.3, vr: (Math.random() - .5) * .3,
+      w: (8 + Math.random() * 10) * dpr, h: (4 + Math.random() * 6) * dpr,
+      c: CONF_COLORS[i % CONF_COLORS.length] }); };
+    for (let k = 0; k < waves; k++) setTimeout(wave, k * 1400);
+  }
+  function drawConfetti() {
+    cfx.clearRect(0, 0, cf.width, cf.height);
+    bits = bits.filter(b => b.y < cf.height + 40);
+    for (const b of bits) {
+      b.x += b.vx + Math.sin(b.y / 60); b.y += b.vy; b.r += b.vr;
+      cfx.save(); cfx.translate(b.x, b.y); cfx.rotate(b.r);
+      cfx.fillStyle = b.c; cfx.fillRect(-b.w / 2, -b.h / 2 * Math.cos(b.r * 2), b.w, b.h * Math.cos(b.r * 2));
+      cfx.restore();
+    }
+  }
 
-  let lastSec = -1;
+
+  let lastSec = -1, ended = false;
   function tick() {
     const t = now(), left = Math.max(0, Math.round((END - t) / 1000));
     if (left !== lastSec) {
       lastSec = left;
       const h = Math.floor(left / 3600), m = Math.floor(left / 60) % 60, s = left % 60;
-      const six7 = force67 || (h === 1 && m === 7);
+      const six7 = force67 || (h === 1 && m === 7), final = left > 0 && left <= 60;
+      document.body.classList.toggle("final", final);
+      document.body.classList.toggle("last10", final && left <= 10);
+      if (final && left <= 10) surge = .7;
       $("count").className = six7 ? "six7" : "";
-      $("count").innerHTML = six7 ? "<span>6</span><span>7</span>"
+      $("count").innerHTML = final ? `<span>${left}</span>`
+        : six7 ? "<span>6</span><span>7</span>"
         : [pad(h), pad(m), pad(s)].map(x => [...x].map(c => `<span>${c}</span>`).join("")).join('<span class="sep">:</span>');
       $("progress").style.width = Math.min(100, (t - START) / (END - START) * 100) + "%";
       const d = new Date(t);
@@ -175,15 +213,16 @@
       else if (left === 21 * 3600 + 37 * 60) fx[2137]();
       else if (left === 4 * 3600 + 20 * 60) fx[420]();
       else if (left % 3600 === 0 && left <= (END - START) / 1000) spike(left / 3600);
-      if (left === 0) $("label").textContent = "Hackathon is over";
+      if (left === 0 && !ended) { ended = true; $("label").textContent = "Hackathon is over"; confetti(); }
     }
   }
   tick(); setInterval(tick, 100);
 
-  // Preview keys: H hour effect, 1 = 2137, 2 = 420, 3 = half time, 6 = toggle "67", F fullscreen
+  // Preview keys: H hour effect, 1 = 2137, 2 = 420, 3 = half time, 6 = toggle "67", C confetti, F fullscreen
   const hourNow = () => spike(Math.max(1, Math.floor((END - now()) / 3.6e6)));
   const keys = { h: hourNow, 1: fx[2137], 2: fx[420], 3: fx.half,
                  6: () => { force67 = !force67; lastSec = -1; },
+                 c: () => confetti(3),
                  f: () => document.documentElement.requestFullscreen?.() };
   addEventListener("keydown", e => keys[e.key.toLowerCase()]?.());
   // ?preview=hour|2137|420|half|67|all
@@ -199,7 +238,7 @@
   const cv = $("eeg"), ctx = cv.getContext("2d");
   const COLORS = ["#0CEBE7", "#8B5CF6", "#FF3D9A", "#0CEBE7", "#8B5CF6", "#FF3D9A"];
   const chans = COLORS.map((c, i) => ({ c, f: [1.3 + i * .37, 3.1 + i * .23, 7.7 + i * .5], p: Math.random() * 99 }));
-  function resize() { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; }
+  function resize() { cf.width = cv.width = innerWidth * devicePixelRatio; cf.height = cv.height = innerHeight * devicePixelRatio; }
   addEventListener("resize", resize); resize();
   function draw(ms) {
     const W = cv.width, H = cv.height, T = ms / 1000;
@@ -219,6 +258,7 @@
       }
       ctx.stroke();
     });
+    drawConfetti();
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
