@@ -49,18 +49,6 @@
   .miniqr { position: fixed; top: 3vh; right: 3vw; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: .8vh; font-size: 1.5vw; color: var(--violet); font-family: "JetBrains Mono", monospace; }
   .miniqr img { height: 28vh; padding: 1.2vh; background: #fff; border-radius: .8vh; image-rendering: pixelated; box-shadow: 0 0 2vh rgba(139,92,246,.5); }
 
-  /* Discord overlay */
-  #discord { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 6vw;
-             background: radial-gradient(ellipse at center, rgba(10,13,32,.92), rgba(3,7,18,.98)); opacity: 0; pointer-events: none; transition: opacity 1s; }
-  #discord.on { opacity: 1; }
-  body.discord main { opacity: .15; filter: blur(8px); }
-  #discord .qr { padding: 2vh; background: #fff; border-radius: 2vh; box-shadow: 0 0 4vh var(--violet), 0 0 10vh rgba(12,235,231,.35); }
-  #discord .qr img { display: block; height: 52vh; image-rendering: pixelated; }
-  #discord .txt { max-width: 42vw; text-align: left; }
-  #discord .txt p:first-child { font-family: "Good Times", sans-serif; font-size: 5vw; color: var(--violet); text-shadow: 0 0 3vh rgba(139,92,246,.7); }
-  #discord .txt p + p { font-size: 2.2vw; line-height: 1.5; margin-top: 3vh; }
-  #discord .txt b { color: var(--cyan); }
-  #discord .mini { font-family: "JetBrains Mono", monospace; font-size: 1.4vw; color: var(--muted); margin-top: 4vh; }
 
   /* Full-hour "neural spike" */
   #spike { position: fixed; inset: 0; z-index: 20; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
@@ -69,13 +57,30 @@
                 background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent;
                 filter: drop-shadow(0 0 3vw rgba(255,61,154,.6)); }
   #spike .sub { font-size: 2.6vw; letter-spacing: .4em; margin-top: 3vh; text-transform: uppercase; }
-  body.spiking #spike { animation: spikeIn 10s ease forwards; }
+  body { --fx: #fff; --dur: 10s; }
+  body.spiking #spike { animation: spikeIn var(--dur) ease forwards; }
   body.spiking #spike .ring { animation: ring 2.2s ease-out infinite; }
   body.spiking #spike .ring:nth-child(2) { animation-delay: .4s; border-color: var(--violet); }
   body.spiking #spike .ring:nth-child(3) { animation-delay: .8s; border-color: var(--pink); }
-  body.spiking #spike .big { animation: glitch .25s steps(2) 6, pop 10s ease forwards; }
-  body.spiking main { animation: hide 10s ease forwards; }
-  body.spiking::after { content: ""; position: fixed; inset: 0; background: #fff; pointer-events: none; animation: flash 1s ease-out forwards; }
+  body.spiking #spike .big { animation: glitch .25s steps(2) 6, pop var(--dur) ease forwards; }
+  body.spiking main { animation: hide var(--dur) ease forwards; }
+  body.spiking::after { content: ""; position: fixed; inset: 0; z-index: 15; background: var(--fx); pointer-events: none; animation: flash 1s ease-out forwards; }
+
+  /* Themed events (2137 / 420 / half time): solid colour + strobing flash for the whole duration */
+  body.t-yellow { --fx: #FFD600; }
+  body.t-green  { --fx: #39FF6A; }
+  body.t-warn   { --fx: #FF3B30; }
+  body.themed.spiking::after { animation: strobe .9s ease-out infinite; }
+  body.themed #spike .big { background: none; color: var(--fx); filter: drop-shadow(0 0 3vw var(--fx)); }
+  body.themed #spike .ring { border-color: var(--fx) !important; }
+  body.t-warn #spike { background: repeating-linear-gradient(-45deg, rgba(255,214,0,.13) 0 4vw, transparent 4vw 8vw); }
+  body.t-warn #spike .sub { color: #FFD600; }
+
+  /* 1:07 left -> "67" bobbing like the hand meme */
+  #count.six7 span { width: 1.1ch; color: #FFD600; text-shadow: 0 0 3vw rgba(255,214,0,.7); animation: bob .45s ease-in-out infinite alternate; }
+  #count.six7 span + span { animation-delay: -.45s; }
+  @keyframes bob { from { transform: translateY(-5vh) rotate(-6deg); } to { transform: translateY(5vh) rotate(6deg); } }
+  @keyframes strobe { from{opacity:.45} to{opacity:0} }
 
   @keyframes spikeIn { 0%{opacity:0} 6%,85%{opacity:1} 100%{opacity:0} }
   @keyframes hide { 0%{opacity:1} 5%,88%{opacity:0;filter:blur(10px)} 100%{opacity:1} }
@@ -111,14 +116,6 @@
   </div>
 </footer>
 
-<div id="discord">
-  <div class="qr"><img src="discord_qr.png" alt="Discord QR"></div>
-  <div class="txt">
-    <p>Discord</p>
-    <p>All info, announcements and the schedule are on our <b>Discord</b>.</p>
-    <p class="mini">// scan the code with your phone</p>
-  </div>
-</div>
 
 <div id="spike">
   <div class="ring"></div><div class="ring"></div><div class="ring"></div>
@@ -129,58 +126,74 @@
 <script>
   const END = new Date("2026-11-15T11:00:00+01:00").getTime();   // CET (Poland, November)
   const START = new Date("2026-11-14T11:00:00+01:00").getTime(); // ponytail: guessed start, only used for the progress bar
-  const DISCORD_EVERY_MIN = 10, DISCORD_SHOW_S = 30;             // QR shows for 30 s every 10 min
   const pad = n => String(n).padStart(2, "0");
   const $ = id => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   const offset = params.has("t") ? new Date(params.get("t")).getTime() - Date.now() : 0; // ?t=2026-11-14T21:59:50+01:00 to fake the clock
   const now = () => Date.now() + offset;
 
-  let surge = 0; // boosts EEG amplitude during the hour effect
+  let surge = 0, tint = null; // EEG amplitude boost / colour override during effects
+  const HALF = (END - START) / 2000; // seconds left at half time
 
-  function spike(hoursLeft) {
-    $("spikeBig").textContent = hoursLeft > 0 ? `${hoursLeft}h` : "THE END";
-    $("spikeSub").textContent = hoursLeft > 1 ? "left · keep hacking" : hoursLeft === 1 ? "final hour!" : "hands off keyboards";
-    document.body.classList.remove("spiking"); void document.body.offsetWidth;
-    document.body.classList.add("spiking");
+  let fxTimer;
+  function show(big, sub, theme = "", dur = 10) {
+    const b = document.body;
+    $("spikeBig").textContent = big;
+    $("spikeBig").style.fontSize = big.length > 4 ? "11vw" : "";
+    $("spikeSub").textContent = sub;
+    b.classList.remove("spiking", "themed", "t-yellow", "t-green", "t-warn"); void b.offsetWidth;
+    b.style.setProperty("--dur", dur + "s");
+    b.classList.add("spiking", ...(theme ? ["themed", "t-" + theme] : []));
+    tint = theme ? getComputedStyle(b).getPropertyValue("--fx").trim() : null;
     surge = 1;
-    setTimeout(() => document.body.classList.remove("spiking"), 10000);
+    clearTimeout(fxTimer);
+    fxTimer = setTimeout(() => { b.classList.remove("spiking", "themed", "t-" + theme); tint = null; }, dur * 1000);
   }
+  const spike = h => show(h > 0 ? `${h}h` : "THE END", h > 1 ? "left · keep hacking" : h === 1 ? "final hour!" : "hands off keyboards");
+  const fx = {
+    half: () => show("HALF TIME", `⚠ ${HALF / 3600}h down · ${HALF / 3600}h to go ⚠`, "warn", 15),
+    2137: () => show("2137", "21:37 left", "yellow", 20),
+    420:  () => show("420", "4:20 left", "green", 20),
+  };
+  let force67 = false;
 
-  function discord(on) {
-    $("discord").classList.toggle("on", on);
-    document.body.classList.toggle("discord", on);
-  }
 
-  let lastSec = -1, forcedDiscord = 0;
+  let lastSec = -1;
   function tick() {
     const t = now(), left = Math.max(0, Math.round((END - t) / 1000));
     if (left !== lastSec) {
       lastSec = left;
       const h = Math.floor(left / 3600), m = Math.floor(left / 60) % 60, s = left % 60;
-      $("count").innerHTML = [pad(h), pad(m), pad(s)].map(x => [...x].map(c => `<span>${c}</span>`).join("")).join('<span class="sep">:</span>');
+      const six7 = force67 || (h === 1 && m === 7);
+      $("count").className = six7 ? "six7" : "";
+      $("count").innerHTML = six7 ? "<span>6</span><span>7</span>"
+        : [pad(h), pad(m), pad(s)].map(x => [...x].map(c => `<span>${c}</span>`).join("")).join('<span class="sep">:</span>');
       $("progress").style.width = Math.min(100, (t - START) / (END - START) * 100) + "%";
       const d = new Date(t);
       $("now").textContent = d.toLocaleTimeString("en-GB", { timeZone: "Europe/Warsaw", hour: "2-digit", minute: "2-digit" });
-      if (left % 3600 === 0 && left <= (END - START) / 1000 && !document.body.classList.contains("spiking")) spike(left / 3600);
+      if (left === HALF) fx.half();                       // half time wins over the full-hour spike
+      else if (left === 21 * 3600 + 37 * 60) fx[2137]();
+      else if (left === 4 * 3600 + 20 * 60) fx[420]();
+      else if (left % 3600 === 0 && left <= (END - START) / 1000) spike(left / 3600);
       if (left === 0) $("label").textContent = "Hackathon is over";
-      const min = d.getMinutes(), sec = d.getSeconds();
-      // skip QR right around the full hour so it doesn't clash with the spike
-      const scheduled = min % DISCORD_EVERY_MIN === 5 && sec < DISCORD_SHOW_S;
-      discord(left > 0 && (scheduled || Date.now() < forcedDiscord));
     }
   }
   tick(); setInterval(tick, 100);
 
-  // Preview keys: H = hour effect, D = Discord QR (15 s), F = fullscreen
-  addEventListener("keydown", e => {
-    const k = e.key.toLowerCase();
-    if (k === "h") spike(Math.max(1, Math.floor((END - now()) / 3.6e6)));
-    if (k === "d") forcedDiscord = Date.now() + 15000;
-    if (k === "f") document.documentElement.requestFullscreen?.();
-  });
-  if (params.get("preview") === "hour") setTimeout(() => spike(Math.max(1, Math.floor((END - now()) / 3.6e6))), 1500);
-  if (params.get("preview") === "discord") forcedDiscord = Date.now() + 1e9;
+  // Preview keys: H hour effect, 1 = 2137, 2 = 420, 3 = half time, 6 = toggle "67", F fullscreen
+  const hourNow = () => spike(Math.max(1, Math.floor((END - now()) / 3.6e6)));
+  const keys = { h: hourNow, 1: fx[2137], 2: fx[420], 3: fx.half,
+                 6: () => { force67 = !force67; lastSec = -1; },
+                 f: () => document.documentElement.requestFullscreen?.() };
+  addEventListener("keydown", e => keys[e.key.toLowerCase()]?.());
+  // ?preview=hour|2137|420|half|67|all
+  const pv = params.get("preview");
+  if (pv === "67") force67 = true;
+  else if (pv === "all") { // ?preview=all plays every effect in sequence
+    const t67 = () => { force67 = true; lastSec = -1; setTimeout(() => { force67 = false; lastSec = -1; }, 8000); };
+    [[1, fx[2137]], [23, fx[420]], [45, fx.half], [62, t67], [72, hourNow]].forEach(([s, f]) => setTimeout(f, s * 1000));
+  }
+  else if (pv) setTimeout({ hour: hourNow, ...fx }[pv] ?? (() => {}), 1500);
 
   // EEG background
   const cv = $("eeg"), ctx = cv.getContext("2d");
@@ -195,8 +208,8 @@
     ctx.lineWidth = 1.5 * devicePixelRatio;
     chans.forEach((ch, i) => {
       const y0 = H * (i + 1) / (chans.length + 1), amp = H * .018 * (1 + surge * 5);
-      ctx.strokeStyle = ch.c; ctx.globalAlpha = .18 + surge * .5;
-      ctx.shadowColor = ch.c; ctx.shadowBlur = 8 + surge * 30;
+      ctx.strokeStyle = tint || ch.c; ctx.globalAlpha = .18 + surge * .5;
+      ctx.shadowColor = tint || ch.c; ctx.shadowBlur = 8 + surge * 30;
       ctx.beginPath();
       for (let x = 0; x <= W; x += 4 * devicePixelRatio) {
         const u = x / W * 12 - T * 1.2 + ch.p;
