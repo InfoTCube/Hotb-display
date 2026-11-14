@@ -70,6 +70,16 @@
   body.t-yellow { --fx: #FFD600; }
   body.t-green  { --fx: #39FF6A; }
   body.t-warn   { --fx: #FF3B30; }
+  body.t-blue   { --fx: #4DA3FF; }
+  body.t-violet { --fx: #C9A2FF; }
+  body.t-vice   { --fx: #FF5FA2; }
+  /* 02:00–03:00: light mode, for everyone who's still awake */
+  body { transition: background-color 1.5s, color 1.5s; }
+  body.light { --bg: #f4f6fb; --text: #0a0d20; --muted: #55607a; }
+  body.t-vice.spiking::after { animation: flash 1.2s ease-out forwards; } /* GTA: one flash, no strobe */
+  #spikeImg { display: none; height: 48vh; filter: drop-shadow(0 0 4vh rgba(255,95,162,.6)); }
+  body.has-img #spikeImg { display: block; animation: pop var(--dur) ease forwards; }
+  #spikeBig:empty { display: none; }
   body.themed.spiking::after { animation: strobe .9s ease-out infinite; }
   body.themed #spike .big { background: none; color: var(--fx); filter: drop-shadow(0 0 3vw var(--fx)); }
   body.themed #spike .ring { border-color: var(--fx) !important; }
@@ -87,6 +97,60 @@
   body.last10 #count { font-size: min(60vw, 92vh); color: var(--pink); text-shadow: 0 0 4vw rgba(255,61,154,.8), 0 0 10vw rgba(255,61,154,.5); }
   body.last10 #count span { animation: beat 1s ease-out; }
   @keyframes beat { from { transform: scale(1.4); filter: brightness(1.8); } to { transform: scale(1); } }
+  /* Mascot: swims across the bottom of the screen now and then */
+  #mascot { position: fixed; left: 0; bottom: 3vh; z-index: 18; width: 30vh; pointer-events: none; visibility: hidden; will-change: transform; }
+  #mascotRig { filter: drop-shadow(0 0 3vh rgba(12,235,231,.45)); }
+  #mascotRig svg { display: block; width: 100%; height: auto; overflow: visible; }
+  #mascot .bubble { position: absolute; bottom: 100%; left: 55%; margin-bottom: 1vh; white-space: nowrap; opacity: 0;
+                    font-family: "JetBrains Mono", monospace; font-size: 2.4vh; font-weight: 700; color: var(--bg);
+                    background: var(--text); padding: 1.2vh 2vh; border-radius: 2vh 2vh 2vh .4vh; box-shadow: 0 0 3vh rgba(139,92,246,.6); }
+  #mascot.go { visibility: visible; animation: swim 18s ease-in-out forwards; }
+  #mascot.go #mascotRig { animation: paddle 1.4s ease-in-out infinite alternate; }
+  #mascot.go .bubble { animation: say 18s ease forwards; }
+  @keyframes swim {
+    0%   { transform: translate(-35vh, 8vh) rotate(12deg); }
+    18%  { transform: translate(14vw, -10vh) rotate(-4deg); }
+    35%  { transform: translate(34vw, -4vh) rotate(3deg); }
+    65%  { transform: translate(46vw, -6vh) rotate(-3deg); }
+    85%  { transform: translate(76vw, -14vh) rotate(6deg); }
+    100% { transform: translate(calc(100vw + 5vh), -2vh) rotate(14deg); }
+  }
+  @keyframes paddle { from { transform: translateY(-1.5vh) scale(1.03, .96); } to { transform: translateY(1.5vh) scale(.97, 1.04) rotate(2deg); } }
+  @keyframes say { 0%, 30% { opacity: 0; transform: scale(.6); } 36%, 72% { opacity: 1; transform: scale(1); } 78%, 100% { opacity: 0; transform: scale(.8); } }
+  /* Claude Code cameo: spark takes the brain icon's place */
+  #spark { position: fixed; z-index: 19; pointer-events: none; filter: drop-shadow(0 0 2vh rgba(217,119,87,.7)); }
+  #spark svg { display: block; width: 100%; height: 100%; animation: bob 1.2s ease-in-out infinite alternate; }
+  #spark.run svg { animation: none; }
+  #spark.run .legA { animation: legs .2s linear infinite; }
+  #spark.run .legB { animation: legs .2s linear infinite; animation-delay: -.1s; }
+  @keyframes legs { 0%, 49% { transform: translateY(0); } 50%, 100% { transform: translateY(-26px); } }
+  @keyframes bob { from { transform: translateY(-3%); } to { transform: translateY(3%); } }
+  body.noqr .miniqr { display: none; } /* corner Discord QR is gone from midnight */
+  /* Socials: every hour at :30 for 20 s */
+  #socials { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center;
+             gap: 2.5vh; text-align: center; opacity: 0; pointer-events: none; transition: opacity 1s;
+             background: radial-gradient(ellipse at center, rgba(10,13,32,.94), rgba(3,7,18,.98)); color: #e8f9ff; }
+  body.socials #socials { opacity: 1; }
+  body.socials main { filter: blur(8px); opacity: .2; }
+  #socials .lead { font-size: 1.7vw; max-width: 70vw; line-height: 1.5; color: #a9b6d6; }
+  #socials .head { font-family: "Good Times", sans-serif; font-size: 4.5vw;
+                   background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  #socials .cards { display: flex; gap: 5vw; margin-top: 3vh; }
+  #socials figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 1.6vh; }
+  #socials figure img { height: 30vh; padding: 1.2vh; background: #fff; border-radius: 1.5vh; box-shadow: 0 0 3vh rgba(139,92,246,.5); }
+  #socials figcaption { font-family: "JetBrains Mono", monospace; font-size: 1.5vw; color: #a9b6d6; }
+  #socials figcaption b { display: block; font-family: Michroma, sans-serif; font-size: 1.8vw; color: var(--cyan); margin-bottom: .4vh; }
+  body.socials #socials figure { animation: rise .8s ease backwards; }
+  body.socials #socials figure:nth-child(2) { animation-delay: .15s; }
+  body.socials #socials figure:nth-child(3) { animation-delay: .3s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(4vh); } }
+  /* Prank: fake blue screen for one minute */
+  #bsod { position: fixed; inset: 0; z-index: 50; display: none; background: #1172A9 url(images.png) center / auto 103% no-repeat; } /* 103%: hides the 1px light edge in the screenshot */
+  body.bsod #bsod { display: block; }
+  #label.cc { color: #D97757; letter-spacing: .15em; font-size: 1.6vw; }
+  /* DVD-style bouncing logo, last 15 minutes */
+  #dvd { position: fixed; left: 0; top: 0; z-index: 22; height: 20vh; pointer-events: none; display: none; will-change: transform;
+         filter: drop-shadow(0 0 2vh rgba(12,235,231,.5)); }
   #confetti { position: fixed; inset: 0; z-index: 25; pointer-events: none; width: 100%; height: 100%; }
   @keyframes strobe { from{opacity:.45} to{opacity:0} }
 
@@ -127,10 +191,24 @@
 
 <div id="spike">
   <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+  <img id="spikeImg" alt="">
   <div class="big" id="spikeBig"></div>
   <div class="sub" id="spikeSub"></div>
 </div>
+<div id="mascot"><div class="bubble" id="mascotSay"></div><div id="mascotRig"></div></div>
+<script src="mascot.js"></script>
+<img id="dvd" src="NOWE%20LOGO%20SVG.svg" alt="">
 <canvas id="confetti"></canvas>
+<div id="bsod"></div>
+<div id="socials">
+  <p class="lead">If you want to see more of our events and keep up to date with next year's hackathon</p>
+  <p class="head">Follow our social media</p>
+  <div class="cards">
+    <figure><img src="qr-tiktok.svg" alt="TikTok QR"><figcaption><b>TikTok</b>@kn.neuron</figcaption></figure>
+    <figure><img src="qr-instagram.svg" alt="Instagram QR"><figcaption><b>Instagram</b>@knneuron_</figcaption></figure>
+    <figure><img src="qr-facebook.svg" alt="Facebook QR"><figcaption><b>Facebook</b>knneuronpwr</figcaption></figure>
+  </div>
+</div>
 
 <script>
   const END = new Date("2026-11-15T11:00:00+01:00").getTime();   // CET (Poland, November)
@@ -138,19 +216,21 @@
   const pad = n => String(n).padStart(2, "0");
   const $ = id => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const offset = params.has("t") ? new Date(params.get("t")).getTime() - Date.now() : 0; // ?t=2026-11-14T21:59:50+01:00 to fake the clock
+  let offset = params.has("t") ? new Date(params.get("t")).getTime() - Date.now() : 0; // ?t=2026-11-14T21:59:50+01:00 to fake the clock
   const now = () => Date.now() + offset;
 
   let surge = 0, tint = null; // EEG amplitude boost / colour override during effects
   const HALF = (END - START) / 2000; // seconds left at half time
 
   let fxTimer;
-  function show(big, sub, theme = "", dur = 10) {
+  function show(big, sub, theme = "", dur = 10, img = "") {
     const b = document.body;
+    if (img) $("spikeImg").src = img;
+    b.classList.toggle("has-img", !!img);
     $("spikeBig").textContent = big;
-    $("spikeBig").style.fontSize = big.length > 4 ? "11vw" : "";
+    $("spikeBig").style.fontSize = big.length > 5 ? "11vw" : big.length > 4 ? "15vw" : "";
     $("spikeSub").textContent = sub;
-    b.classList.remove("spiking", "themed", "t-yellow", "t-green", "t-warn"); void b.offsetWidth;
+    b.classList.remove("spiking", "themed", "t-yellow", "t-green", "t-warn", "t-blue", "t-violet", "t-vice"); void b.offsetWidth;
     b.style.setProperty("--dur", dur + "s");
     b.classList.add("spiking", ...(theme ? ["themed", "t-" + theme] : []));
     tint = theme ? getComputedStyle(b).getPropertyValue("--fx").trim() : null;
@@ -163,8 +243,48 @@
     half: () => show("HALF TIME", `⚠ ${HALF / 3600}h down · ${HALF / 3600}h to go ⚠`, "warn", 15),
     2137: () => show("2137", "21:37 left", "yellow", 20),
     420:  () => show("420", "4:20 left", "green", 20),
+    gta:  () => show("", "19:11 left · see you on 19.11 🌴", "vice", 12, "gta6-logo.webp"),
+    seq:  () => show("12:34:56", "perfectly in order", "blue", 15),
+    wish: () => show("11:11:11", "make a wish ✨", "violet", 15),
+    clock2137: () => show("21:37", "it is 21:37 o’clock", "yellow", 20),
   };
-  let force67 = false;
+  let force67 = false, forceLight = false, forceNoqr = false;
+  const BSOD_AT = new Date("2026-11-15T08:18:00+01:00").getTime(); // rolled at random, clear of every other effect
+  let bsodUntil = 0, socialsUntil = 0; // for previews
+  const QR_OFF_AT = new Date("2026-11-15T00:00:00+01:00").getTime(); // Discord QR hidden from midnight
+
+  // DVD logo: the path is computed backwards from the bottom-right corner, so it lands there exactly at dvd.end.
+  // Speeds are in "screen widths/heights per second", tuned by search: the closest earlier pass is ~0.5% from a corner
+  // (~8 px at 1080p): a near miss, never a fake hit.
+  const DVD_V = [0.1, 0.123], DVD_LEAD = 15 * 60; // bounces 15 min, then the hit
+  let dvd = null; // { end: ms when it hits the corner }
+  // Runs once: starts at a random full hour (not the first/last 2 h, not half time). Saved so a reload keeps the same hour.
+  const DVD_START = (() => {
+    const key = "hotb-dvd-start";
+    try { const v = +localStorage.getItem(key); if (v) return v; } catch {}
+    const hours = [];
+    for (let k = 2; k <= 22; k++) if (k !== 12 && END - k * 3600e3 > Date.now()) hours.push(k);
+    const v = hours.length ? END - hours[Math.floor(Math.random() * hours.length)] * 3600e3 : 0;
+    try { localStorage.setItem(key, v); } catch {}
+    return v;
+  })();
+  if (DVD_START) console.log("DVD logo bounces at", new Date(DVD_START).toLocaleTimeString("en-GB", { timeZone: "Europe/Warsaw" }));
+  const fold = u => { u = ((u % 2) + 2) % 2; return u > 1 ? 2 - u : u; }; // unfolded distance -> 0..1 between walls
+  function dvdFrame(t) {
+    const el = $("dvd");
+    if (!dvd) return;
+    const s = (dvd.end - t) / 1000; // seconds until the corner
+    if (s < -8) { el.style.display = "none"; dvd = null; return; }
+    el.style.display = "block";
+    const ux = 1 - DVD_V[0] * Math.max(s, 0), uy = 1 - DVD_V[1] * Math.max(s, 0);
+    el.style.transform = `translate(${fold(ux) * (innerWidth - el.offsetWidth)}px, ${fold(uy) * (innerHeight - el.offsetHeight)}px)`;
+    const walls = Math.floor(ux) + Math.floor(uy); // changes on every wall hit -> new colour, like the old TVs
+    el.style.filter = `hue-rotate(${(walls * 67) % 360}deg) drop-shadow(0 0 2vh rgba(12,235,231,.5))`;
+    if (s <= 0 && !dvd.hit) {
+      dvd.hit = true;
+      if (dvd.end !== END) { show("CORNER!", "🎯 it finally hit the corner", "green", 8); confetti(3); } // at END, THE END + confetti take over
+    }
+  }
 
   // Confetti: waves of falling paper for ~20 s
   const cf = $("confetti"), cfx = cf.getContext("2d");
@@ -192,7 +312,7 @@
   }
 
 
-  let lastSec = -1, ended = false;
+  let lastSec = -1, ended = false, creditHour = -1, creditMin = 0;
   function tick() {
     const t = now(), left = Math.max(0, Math.round((END - t) / 1000));
     if (left !== lastSec) {
@@ -207,30 +327,167 @@
         : six7 ? "<span>6</span><span>7</span>"
         : [pad(h), pad(m), pad(s)].map(x => [...x].map(c => `<span>${c}</span>`).join("")).join('<span class="sep">:</span>');
       $("progress").style.width = Math.min(100, (t - START) / (END - START) * 100) + "%";
-      const d = new Date(t);
+      const d = new Date(t), wall = d.toLocaleTimeString("en-GB", { timeZone: "Europe/Warsaw" });
       $("now").textContent = d.toLocaleTimeString("en-GB", { timeZone: "Europe/Warsaw", hour: "2-digit", minute: "2-digit" });
       if (left === HALF) fx.half();                       // half time wins over the full-hour spike
       else if (left === 21 * 3600 + 37 * 60) fx[2137]();
       else if (left === 4 * 3600 + 20 * 60) fx[420]();
+      else if (left === 19 * 3600 + 11 * 60) fx.gta();   // GTA VI comes out on 19.11
+      else if (left === 12 * 3600 + 34 * 60 + 56) fx.seq();
+      else if (left === 11 * 3600 + 11 * 60 + 11) fx.wish();
+      else if (wall === "21:37:00") fx.clock2137();      // actual Warsaw time, not time left
+      // Credit screen once an hour at a random minute (3–56, so never on the full-hour effect); skipped if something else is on
+      const hr = Math.floor(t / 3.6e6), [, mm, ss] = wall.split(":").map(Number);
+      if (hr !== creditHour) { creditHour = hr; do creditMin = 3 + Math.floor(Math.random() * 54); while (Math.abs(creditMin - 30) < 2); } // keep clear of socials
+      document.body.classList.toggle("socials", (mm === 30 && ss < 20 && left > 60) || Date.now() < socialsUntil);
+      if (mm === creditMin && ss === 0 && left > 60 && !document.body.classList.contains("spiking")) cameo();
       else if (left % 3600 === 0 && left <= (END - START) / 1000) spike(left / 3600);
+      document.body.classList.toggle("noqr", t >= QR_OFF_AT || forceNoqr);
+      document.body.classList.toggle("light", wall.startsWith("02:") || forceLight);
+      document.body.classList.toggle("bsod", (t >= BSOD_AT && t < BSOD_AT + 60000) || Date.now() < bsodUntil);
       if (left === 0 && !ended) { ended = true; $("label").textContent = "Hackathon is over"; confetti(); }
     }
   }
   tick(); setInterval(tick, 100);
 
-  // Preview keys: H hour effect, 1 = 2137, 2 = 420, 3 = half time, 6 = toggle "67", C confetti, F fullscreen
+  // Preview keys: H hour effect, 1 = 2137, 2 = 420, 3 = half time, 4 = 12:34:56, 5 = 11:11:11, 7 = 21:37 clock, 6 = toggle "67", C confetti, F fullscreen
   const hourNow = () => spike(Math.max(1, Math.floor((END - now()) / 3.6e6)));
-  const keys = { h: hourNow, 1: fx[2137], 2: fx[420], 3: fx.half,
+  const keys = { h: hourNow, 1: fx[2137], 2: fx[420], 3: fx.half, 4: fx.seq, 5: fx.wish, 7: fx.clock2137,
                  6: () => { force67 = !force67; lastSec = -1; },
                  c: () => confetti(3),
+                 m: () => visit(true),
+                 b: () => dvd = { end: now() + 20000 },
+                 k: () => cameo(),
+                 g: () => fx.gta(),
+                 s: () => { socialsUntil = Date.now() + 20000; lastSec = -1; },
+                 l: () => { forceLight = !forceLight; lastSec = -1; },
+                 x: () => { bsodUntil = Date.now() + 10000; lastSec = -1; },
                  f: () => document.documentElement.requestFullscreen?.() };
   addEventListener("keydown", e => keys[e.key.toLowerCase()]?.());
   // ?preview=hour|2137|420|half|67|all
+  // Claude Code cameo (once an hour, random minute): the Claude Code critter runs in from the right, knocks the
+  // brain icon out of the title, sits in its place for 20 s, the label briefly credits Claude Code, then leaves.
+  // Shape traced from claudecode.png and rebuilt as blocks so the legs can run.
+  const SPARK = `<svg viewBox="0 0 500 320"><g fill="#D97757">
+    <rect x="62" y="0" width="375" height="252"/><rect x="0" y="125" width="500" height="64"/>
+    <g class="legA"><rect x="94" y="250" width="31" height="62"/><rect x="313" y="250" width="31" height="62"/></g>
+    <g class="legB"><rect x="156" y="250" width="31" height="62"/><rect x="375" y="250" width="31" height="62"/></g></g>
+    <g fill="#030712"><rect x="125" y="65" width="31" height="60"/><rect x="345" y="65" width="31" height="60"/></g></svg>`;
+  let cameoOn = false;
+  function cameo() {
+    const b = document.body;
+    if (cameoOn || b.classList.contains("spiking") || b.classList.contains("final") || ended) return;
+    cameoOn = true;
+    const brain = document.querySelector(".brand img"), label = $("label"), r = brain.getBoundingClientRect();
+    const s = document.createElement("div"); s.id = "spark"; s.innerHTML = SPARK;
+    Object.assign(s.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" });
+    b.append(s);
+    const dx = innerWidth - r.left, hop = r.height * .12; // runs in from the right edge, hopping
+    s.classList.add("run");
+    s.animate([0, .15, .3, .45, .6, .75].map((o, i) => ({ transform: `translate(${dx * (1 - o / .85)}px, ${i % 2 ? -hop : 0}px)`, offset: o }))
+               .concat([{ transform: `translate(${dx * .12}px, ${-r.height * .7}px)`, offset: .85 }, { transform: "none", offset: 1 }]),
+              { duration: 2500, easing: "linear" });
+    let knock;
+    const swapLabel = (text, cc) => label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 350 }).onfinish = () => {
+      label.textContent = text; label.classList.toggle("cc", cc); label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350 }); };
+    const oldLabel = label.textContent;
+    setTimeout(() => { // impact
+      knock = brain.animate([{ transform: "none", opacity: 1 },
+                             { transform: `translate(${-.3 * innerWidth}px, ${.9 * innerHeight}px) rotate(-720deg) scale(.4)`, opacity: 0 }],
+                            { duration: 1300, easing: "cubic-bezier(.3,-.5,.7,1)", fill: "forwards" });
+      document.querySelector(".brand").animate([{ translate: "0 0" }, { translate: "-.8vw .4vh" }, { translate: ".6vw -.4vh" }, { translate: "0 0" }], { duration: 300 });
+      surge = .6;
+      s.classList.remove("run");
+    }, 2500);
+    setTimeout(() => swapLabel("our tech team is proudly supported by Claude Code", true), 22500); // after 20 s in place
+    setTimeout(() => {
+      swapLabel(oldLabel, false);
+      s.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(0) rotate(180deg)", opacity: 0 }], { duration: 500, fill: "forwards" }).onfinish = () => s.remove();
+      knock?.cancel();
+      brain.animate([{ transform: "translateY(-50vh)", opacity: 0 }, { transform: "none", opacity: 1, offset: .7 },
+                     { transform: "translateY(-2vh)", offset: .85 }, { transform: "none" }], { duration: 900, easing: "ease-in" });
+      cameoOn = false;
+    }, 29000);
+  }
+
+  // Mascot visits at a random moment every 15–30 min, skipping effects and the final minute
+  const MSGS = ["keep hacking!", "drink some water 💧", "brain power 🧠", "stretch your tentacles!",
+                "commit your code!", "you got this 💪", "have you slept? 👀", "8 arms, 0 bugs 🐙"];
+  // Live rig: the real SVG parts move. Tentacles swing around where they join the body (their dots and
+  // suckers come along), eyes blink, headband LEDs cycle, face switches calm -> focused -> happy.
+  const rig = (() => {
+    const NS = "http://www.w3.org/2000/svg";
+    $("mascotRig").innerHTML = window.MASCOT_SVG || "";
+    const svg = $("mascotRig").querySelector("svg");
+    if (!svg) return { frame() {}, setFace() {} };
+    const L = label => [...svg.querySelectorAll("g")].find(g => g.getAttribute("inkscape:label") === label);
+    const wrap = el => { const g = document.createElementNS(NS, "g"); el.before(g); g.append(el); return g; };
+    const toRoot = el => { const b = el.getBBox(), m = svg.getScreenCTM().inverse().multiply(el.getScreenCTM());
+                           return new DOMPoint(b.x + b.width / 2, b.y + b.height / 2).matrixTransform(m); };
+    // [index in the body/fill layers, pivot as fraction of the tentacle's bbox, swing in degrees, phase]
+    const outline = [...L("body - default").children], fill = [...L("fill").children];
+    const limbs = [[1, 1, .5, 9, 0], [3, 1, .15, 11, 1.3], [4, 0, .5, 9, 2.1], [5, 0, .15, 11, 3.4], [6, .8, 0, 6, .7], [7, .2, 0, 6, 2.8]]
+      .map(([i, px, py, amp, ph]) => { const b = fill[i].getBBox();
+        return { path: fill[i], parts: [wrap(outline[i]), wrap(fill[i])], cx: b.x + b.width * px, cy: b.y + b.height * py, amp, ph }; });
+    const loose = [...L("kropki").querySelectorAll("path,ellipse,circle"), ...[...L("macka").children].filter(e => e.id !== "path883")];
+    for (const el of loose) { const p = toRoot(el), limb = limbs.find(l => l.path.isPointInFill(p)); if (limb) limb.parts.push(wrap(el)); }
+
+    const faces = { calm: L("elementy - oblivious / confused"), happy: L("elementy - very happy"), focused: L("elementy - determined") };
+    const eyes = ["path10", "path10-0"].map(id => svg.getElementById(id)).filter(Boolean).map(eye => {
+      const c = toRoot(eye), b = eye.getBBox();
+      const items = [...faces.calm.children].filter(el => { const p = toRoot(el); return Math.abs(p.x - c.x) < b.width * .6 && Math.abs(p.y - c.y) < b.height * .6; });
+      const g = document.createElementNS(NS, "g"); items[0].before(g); g.append(...items); return { g, cy: c.y };
+    });
+    const leds = [L("pom"), L("ziel"), L("czerw")];
+
+    let blinkAt = 0;
+    function frame(t, waving) {
+      limbs.forEach((l, i) => {
+        const a = waving && i === 2 ? -30 + 18 * Math.sin(t * 9) : l.amp * Math.sin(t * 3.2 + l.ph); // right arm waves hello
+        const tr = `rotate(${a.toFixed(2)} ${l.cx} ${l.cy})`;
+        for (const p of l.parts) p.setAttribute("transform", tr);
+      });
+      if (t > blinkAt) blinkAt = t + 2 + Math.random() * 3;
+      const d = blinkAt - t, s = d > .15 ? 1 : Math.max(.08, Math.abs(d / .075 - 1));
+      for (const e of eyes) e.g.setAttribute("transform", `translate(0 ${e.cy}) scale(1 ${s.toFixed(2)}) translate(0 ${-e.cy})`);
+      const k = Math.floor(t * 3) % 3;
+      leds.forEach((g, i) => g && (g.style.display = i === k ? "inline" : "none"));
+    }
+    const setFace = name => Object.entries(faces).forEach(([n, g]) => g && (g.style.display = n === name ? "inline" : "none"));
+    return { frame, setFace };
+  })();
+  let waving = false, faceTimers = [];
+
+  function visit(force = false) {
+    const m = $("mascot"), b = document.body;
+    if (!force && (b.classList.contains("spiking") || b.classList.contains("final") || ended)) return setTimeout(visit, 60000);
+    $("mascotSay").textContent = MSGS[Math.floor(Math.random() * MSGS.length)];
+    faceTimers.forEach(clearTimeout);
+    rig.setFace("focused"); waving = false;                         // swimming in
+    faceTimers = [setTimeout(() => { rig.setFace("happy"); waving = true; }, 6300),   // bubble up: smile + wave
+                  setTimeout(() => { rig.setFace("calm"); waving = false; }, 13000)]; // swimming off
+    m.classList.remove("go"); void m.offsetWidth; m.classList.add("go");
+  }
+  $("mascot").addEventListener("animationend", e => e.target.id === "mascot" && e.target.classList.remove("go"));
+  (function schedule() { setTimeout(() => { visit(); schedule(); }, (15 + Math.random() * 15) * 60000); })();
+
   const pv = params.get("preview");
+  if (pv === "bsod") setTimeout(() => { bsodUntil = Date.now() + 60000; lastSec = -1; }, 1500);
+  if (pv === "light") forceLight = true;
+  if (pv === "new") { // ?preview=new: the latest additions in a row (~100 s)
+    const set = f => () => { f(); lastSec = -1; };
+    [[1, fx.gta], [15, cameo], [46, set(() => bsodUntil = Date.now() + 10000)], [58, set(() => socialsUntil = Date.now() + 20000)],
+     [80, set(() => forceLight = true)], [92, set(() => forceLight = false)], [94, set(() => forceNoqr = true)], [102, set(() => forceNoqr = false)]]
+      .forEach(([sec, f]) => setTimeout(f, sec * 1000));
+  }
+  if (pv === "socials") setTimeout(() => { socialsUntil = Date.now() + 60000; lastSec = -1; }, 1000);
+  if (pv === "claude") setTimeout(cameo, 1000);
+  if (pv === "dvd") dvd = { end: now() + 25000 }; // 25 s of bouncing, then the corner hit
+  if (pv === "mascot") { setTimeout(() => visit(true), 1000); setInterval(() => visit(true), 20000); } // loops for showing off
   if (pv === "67") force67 = true;
   else if (pv === "all") { // ?preview=all plays every effect in sequence
     const t67 = () => { force67 = true; lastSec = -1; setTimeout(() => { force67 = false; lastSec = -1; }, 8000); };
-    [[1, fx[2137]], [23, fx[420]], [45, fx.half], [62, t67], [72, hourNow]].forEach(([s, f]) => setTimeout(f, s * 1000));
+    [[1, fx[2137]], [23, fx[420]], [45, fx.half], [62, t67], [72, hourNow], [84, fx.seq], [101, fx.wish], [118, fx.clock2137], [140, () => visit(true)], [160, () => dvd = { end: now() + 20000 }], [192, () => cameo()], [225, () => offset = END - 13000 - Date.now()]].forEach(([s, f]) => setTimeout(f, s * 1000));
   }
   else if (pv) setTimeout({ hour: hourNow, ...fx }[pv] ?? (() => {}), 1500);
 
@@ -259,6 +516,9 @@
       ctx.stroke();
     });
     drawConfetti();
+    if (!dvd && DVD_START && now() >= DVD_START && now() < DVD_START + DVD_LEAD * 1000) dvd = { end: DVD_START + DVD_LEAD * 1000 };
+    dvdFrame(now());
+    if ($("mascot").classList.contains("go")) rig.frame(T, waving);
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
